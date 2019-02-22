@@ -2,67 +2,85 @@ package com.SmoothStack.SmoothStackLoginCase5.Controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.SmoothStack.SmoothStackLoginCase5.ControllerHelper.JsonConverter;
 import com.SmoothStack.SmoothStackLoginCase5.Entity.Borrower;
-import com.SmoothStack.SmoothStackLoginCase5.ServiceHelper.BorrowerService;
-
-
+import com.SmoothStack.SmoothStackLoginCase5.Exception.ResourceNotFoundException;
+import com.SmoothStack.SmoothStackLoginCase5.Repository.BorrowerRepository;
 
 @RestController
+@RequestMapping("/lms")
 public class BorrowerController {
-    
+	
 	@Autowired
-	BorrowerService borrowerService;
+	BorrowerRepository borrowerRepository;
 	
-	@RequestMapping(path="/lms/borrower", method=RequestMethod.GET)
-	public String getBorrower(){
-		List<Borrower> borrower = new BorrowerService().getBorrower();
-		JsonConverter converter = new JsonConverter();
-		String output = converter.convertBorrowerListToJson(borrower);
-		return output;
+	//Get All Borrower
+//	@RequestMapping(value="/borrowers", method=RequestMethod.GET)
+	@GetMapping("/borrowers")
+	public List<Borrower> getAllBorrower(){
+		return borrowerRepository.findAll();
 	}
 	
-	@RequestMapping(path="/lms/borrower/{borrower}", method=RequestMethod.POST)
-	public boolean addBorrower(@RequestBody Borrower borrower) {
-		return borrowerService.addBorrower(borrower);
+	//Create a new borrower
+	@PostMapping("/borrower")
+	public Borrower createBorrower(@Valid @RequestBody Borrower borrower) {
+		return borrowerRepository.save(borrower);
+		
 	}
 	
-//	@RequestMapping(path="/lms/borrower/returnList/{cardNo}", method=RequestMethod.GET)
-//	public String getBorrowerById(@PathVariable(value = "cardNo") int cardNo){
-//		List<Borrower> borrower = new BorrowerService().getBorrowerById(cardNo);
-//		JsonConverter converter = new JsonConverter();
-//		String output = converter.convertBorrowerListToJson(borrower);
-//		return output;
-//	}
-	
-	@RequestMapping(path="/lms/borrower/{cardNo}", method=RequestMethod.GET)
-	public Borrower getBorrowerByIdReturn(@PathVariable(value = "cardNo") int cardNo) {
-		return borrowerService.getBorrowerByIdReturn(cardNo);
+	//Get a Single Borrower
+	@GetMapping("/borrower/{id}")
+	public Borrower getNoteById(@PathVariable(value = "id") int borrowerId) {
+		return borrowerRepository.findById(borrowerId)
+				.orElseThrow(()-> new ResourceNotFoundException("Borrower", "id", borrowerId));
 	}
 	
-	@RequestMapping(path="/lms/borrower/{borrower}", method=RequestMethod.PUT)
-	public boolean updateBorrower(@RequestBody Borrower borrower) {
-		return borrowerService.updateBorrower(borrower);
+	//Get a Single Borrower by line within Borrowers
+	@GetMapping("/borrowers/{line}")
+	public List<Borrower> getBorrowerByLine(@PathVariable(value = "line") int line) {
+		Page<Borrower> borrowerPage = borrowerRepository.findAll(PageRequest.of(line-1, 1));
+		List<Borrower> borrower = borrowerPage.getContent();
+		return borrower;
 	}
 	
-	@RequestMapping(path="/lms/borrower/{borrower}", method=RequestMethod.DELETE)
-	public boolean deleteBorrower(@RequestBody Borrower borrower) {
-		return borrowerService.deleteBorrower(borrower);
+	//Update a Borrower
+	@PutMapping("/borrower/{id}")
+	public Borrower updateBorrower(@PathVariable(value = "id") int borrowerId,
+							@Valid @RequestBody Borrower borrowerDetails) {
+		Borrower borrower = borrowerRepository.findById(borrowerId)
+				.orElseThrow(()-> new ResourceNotFoundException("Borrower", "id", borrowerId));
+		borrower.setBorrowerName(borrowerDetails.getBorrowerName());
+		borrower.setBorrowerAddress(borrowerDetails.getBorrowerAddress());
+		borrower.setBorrowerPhone(borrowerDetails.getBorrowerPhone());
+		borrower.setBorrowerUserName(borrowerDetails.getBorrowerUserName());
+		borrower.setBorrowerPassword(borrowerDetails.getBorrowerPassword());
+		
+		Borrower updatedBorrower = borrowerRepository.save(borrower);
+		return updatedBorrower;
 	}
 	
-	@RequestMapping(path="/lms/borrower/line/{lineNo}", method=RequestMethod.GET)
-	public String getSingleBorrower(@PathVariable(value = "lineNo") int count) {
-		List<Borrower> borrower = new BorrowerService().getSingleBorrower(count);
-		JsonConverter converter = new JsonConverter();
-		String output = converter.convertBorrowerListToJson(borrower);
-		return output;
+	//Delete a Borrower
+	@DeleteMapping("/borrower/{id}")
+	public ResponseEntity<?> deleteBorrower(@PathVariable(value = "id") int borrowerId){
+		Borrower borrower = borrowerRepository.findById(borrowerId)
+				.orElseThrow(()-> new ResourceNotFoundException("Borrower", "id", borrowerId));
+		borrowerRepository.delete(borrower);
+		
+		return ResponseEntity.ok().build();
 	}
-
 }
+

@@ -1,62 +1,121 @@
 package com.SmoothStack.SmoothStackLoginCase5.Entity;
-import java.sql.Date;
 
-//db to support jdbctest.java
-public class BookLoan {
-	private Book bookId;
-	private LibraryBranch branchId;
-	private Borrower cardNo ;
-	private Date dateOut;
-	private Date dueDate;
+import java.io.Serializable;
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+
+@Entity(name = "tbl_book_loans")
+@Table(name = "tbl_book_loans")
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
+	allowGetters = true)
+public class BookLoan implements Serializable{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	@EmbeddedId
+	private BookLoanId bookLoanId;
+		
+	@NotBlank
+	@Column(name = "dateOut", nullable = false)
+	private LocalDate dateOut;
+	
+	@NotBlank
+	@Column(name = "dueDate", nullable = false)
+	private LocalDate dueDate;
+	
+	@NotBlank
+	@Column(name = "returned", nullable = false)
 	private boolean returned;
 	
-	public Book getBookId() {
-		return bookId;
+	@NotBlank
+	@Column(name = "extended", nullable = false)
+	private int extended;
+	
+	@Column(name = "bookId")
+	public Book getBook() {
+		return bookLoanId.getBook();
 	}
-	public void setBookId(Book bookId) {
-		this.bookId = bookId;
+
+	public void setBook(Book book) {
+		this.bookLoanId.setBook(book);
 	}
-	public LibraryBranch getBranchId() {
-		return branchId;
+	
+	@Column(name = "branchId")
+	public LibraryBranch getLibraryBranch() {
+		return bookLoanId.getLibraryBranch();
 	}
-	public void setBranchId(LibraryBranch branchId) {
-		this.branchId = branchId;
+
+	public void setLibraryBranch(LibraryBranch libraryBranch) {
+		this.bookLoanId.setLibraryBranch(libraryBranch);;
 	}
-	public Borrower getCardNo() {
-		return cardNo;
+	
+	@Column(name = "cardNo")
+	public Borrower getBorrower() {
+		return bookLoanId.getBorrower();
 	}
-	public void setCardNo(Borrower cardNo) {
-		this.cardNo = cardNo;
+
+	public void setBorrower(Borrower borrower) {
+		this.bookLoanId.setBorrower(borrower);;
 	}
-	public Date getDateOut() {
+	
+	public LocalDate getDateOut() {
 		return dateOut;
 	}
-	public void setDateOut(Date dateOut) {
+
+	public void setDateOut(LocalDate dateOut) {
 		this.dateOut = dateOut;
 	}
-	public Date getDueDate() {
+	
+	public void setDateOutToDueDate(LocalDate dueDate) {
+		this.dateOut = dueDate;
+	}
+
+	public LocalDate getDueDate() {
 		return dueDate;
 	}
-	public void setDueDate(Date dueDate) {
+
+	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
 	}
-	public boolean getReturned() {
+	
+	public void setDueDateExtend7Day(LocalDate dueDate) {
+		LocalDate weekLater = dueDate.plusDays(7);
+		this.dueDate = weekLater;
+	}
+
+	public boolean isReturned() {
 		return returned;
 	}
+
 	public void setReturned(boolean returned) {
 		this.returned = returned;
 	}
-	
-	
-	@Override
-	public String toString() {
-		return "BookLoans [bookId= " + bookId 
-				+ ", branchId= " + branchId 
-				+ ", cardNo= " + cardNo 
-				+ ", dateOut= " + dateOut
-				+ ", dueDate= " + dueDate 
-				+ ", returned= " + returned + "]";
+
+	public int getExtended() {
+		return extended;
+	}
+
+	public void setExtended(int extended) {
+		this.extended = extended;
 	}
 	
+	public void setExtended1Time(int extended) {
+		this.extended = extended++;
+	}
+
+	@Override
+	public String toString() {
+		return "BookLoan [dateOut=" + dateOut + ", dueDate=" + dueDate + ", returned=" + returned + ", extended="
+				+ extended + "]";
+	}
 	
 }
+

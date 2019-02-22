@@ -1,34 +1,65 @@
 package com.SmoothStack.SmoothStackLoginCase5.Entity;
-//db to support jdbctest.java
-public class LibraryBranch {
-	private int branchId;
-	private String branchName;
-	private String branchAddress;
-	public int getBranchId() {
-		return branchId;
+
+import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+
+@Entity(name = "tbl_library_branch")
+@Table(name = "tbl_library_branch")
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
+	allowGetters = true)
+public class LibraryBranch implements Serializable{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@Column(name = "branchId")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int libraryBranchId;
+	
+	@NotBlank
+	@Column(name = "branchName", nullable = false)
+	private String libraryBranchName;
+	
+	@NotBlank
+	@Column(name = "branchAddress", nullable = false)
+	private String libraryBranchAddress;
+	
+	public int getLibraryBranchId() {
+		return libraryBranchId;
 	}
-	public void setBranchId(int branchId) {
-		this.branchId = branchId;
+
+	public void setLibraryBranchId(int libraryBranchId) {
+		this.libraryBranchId = libraryBranchId;
 	}
-	public String getBranchName() {
-		return branchName;
+
+	public String getLibraryBranchName() {
+		return libraryBranchName;
 	}
-	public void setBranchName(String branchName) {
-		this.branchName = branchName;
+
+	public void setLibraryBranchName(String libraryBranchName) {
+		this.libraryBranchName = libraryBranchName;
 	}
-	public String getBranchAddress() {
-		return branchAddress;
+
+	public String getLibraryBranchAddress() {
+		return libraryBranchAddress;
 	}
-	public void setBranchAddress(String branchAddress) {
-		this.branchAddress = branchAddress;
+
+	public void setLibraryBranchAddress(String libraryBranchAddress) {
+		this.libraryBranchAddress = libraryBranchAddress;
 	}
+
 	@Override
 	public String toString() {
-		return "LibraryBranch [branchId= " + branchId 
-				+ ", branchName= " + branchName 
-				+ ", branchAddress= " + branchAddress
-				+ "]";
-	}
-	
+		return "LibraryBranch [libraryBranchId=" + libraryBranchId + ", libraryBranchName=" + libraryBranchName + ", libraryBranchAddress="
+				+ libraryBranchAddress + "]";
+	}	
 	
 }
+

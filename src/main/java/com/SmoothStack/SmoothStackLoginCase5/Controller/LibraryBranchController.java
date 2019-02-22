@@ -2,65 +2,88 @@ package com.SmoothStack.SmoothStackLoginCase5.Controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.SmoothStack.SmoothStackLoginCase5.ControllerHelper.JsonConverter;
 import com.SmoothStack.SmoothStackLoginCase5.Entity.LibraryBranch;
-import com.SmoothStack.SmoothStackLoginCase5.ServiceHelper.LibraryBranchService;
+import com.SmoothStack.SmoothStackLoginCase5.Exception.ResourceNotFoundException;
+import com.SmoothStack.SmoothStackLoginCase5.Repository.LibraryBranchRepository;
 
 @RestController
+@RequestMapping("/lms")
 public class LibraryBranchController {
 	
 	@Autowired
-	LibraryBranchService libraryBranchService;
+	LibraryBranchRepository libraryBranchRepository;
 	
-	@RequestMapping(path="/lms/libraryBranch", method=RequestMethod.GET)
-	public String getLibraryBranch(){
-		List<LibraryBranch> libraryBranch = new LibraryBranchService().getLibraryBranch();
-		JsonConverter converter = new JsonConverter();
-		String output = converter.convertLibraryBranchListToJson(libraryBranch);
-		return output;
+	//Get All LibraryBranch
+//	@RequestMapping(value="/libraryBranches", method=RequestMethod.GET)
+	@GetMapping("/libraryBranches")
+	public List<LibraryBranch> getAllLibraryBranch(){
+		return libraryBranchRepository.findAll();
 	}
 	
-	@RequestMapping(path="/lms/libraryBranch/{libraryBranch}", method=RequestMethod.POST)
-	public boolean addLibraryBranch(@RequestBody LibraryBranch libraryBranch) {
-		return libraryBranchService.addLibraryBranch(libraryBranch);
+	//Create a new libraryBranch
+	@PostMapping("/libraryBranch")
+	public LibraryBranch createLibraryBranch(@Valid @RequestBody LibraryBranch libraryBranch) {
+		return libraryBranchRepository.save(libraryBranch);
+		
 	}
 	
-//	@RequestMapping(path="/lms/libraryBranch/returnList/{branchId}", method=RequestMethod.GET)
-//	public String getLibraryBranchById(@PathVariable(value = "branchId") int branchId){
-//		List<LibraryBranch> libraryBranch = new LibraryBranchService().getLibraryBranchById(branchId);
-//		JsonConverter converter = new JsonConverter();
-//		String output = converter.convertToJson(libraryBranch);
-//		return output;
-//	}
-	
-	@RequestMapping(path="/lms/libraryBranch/{branchId}", method=RequestMethod.GET)
-	public LibraryBranch getLibraryBranchByIdReturn(@PathVariable(value = "branchId") int branchId) {
-		return libraryBranchService.getLibraryBranchByIdReturn(branchId);
+	//Get a Single LibraryBranch
+	@GetMapping("/libraryBranch/{id}")
+	public LibraryBranch getLibraryBranchById(@PathVariable(value = "id") int libraryBranchId) {
+		return libraryBranchRepository.findById(libraryBranchId)
+				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
 	}
 	
-	@RequestMapping(path="/lms/libraryBranch/{libraryBranch}", method=RequestMethod.PUT)
-	public boolean updateLibraryBranch(@RequestBody LibraryBranch libraryBranch) {
-		return libraryBranchService.updateLibraryBranch(libraryBranch);
+	//Get a Single libraryBranch by line within libraryBranchs
+	@GetMapping("/libraryBranches/{line}")
+	public List<LibraryBranch> getLibraryBranchByLine(@PathVariable(value = "line") int line) {
+		Page<LibraryBranch> libraryBranchPage = libraryBranchRepository.findAll(PageRequest.of(line-1, 1));
+		List<LibraryBranch> libraryBranch = libraryBranchPage.getContent();
+		return libraryBranch;
 	}
 	
-	@RequestMapping(path="/lms/libraryBranch/{libraryBranch}", method=RequestMethod.DELETE)
-	public boolean deleteLibraryBranch(@RequestBody LibraryBranch libraryBranch) {
-		return libraryBranchService.deleteLibraryBranch(libraryBranch);
+	//Update a LibraryBranch
+	@PutMapping("/libraryBranch/{id}")
+	public LibraryBranch updateLibraryBranch(@PathVariable(value = "id") int libraryBranchId,
+							@Valid @RequestBody LibraryBranch libraryBranchDetails) {
+		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
+				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
+		libraryBranch.setLibraryBranchName(libraryBranchDetails.getLibraryBranchName());
+		libraryBranch.setLibraryBranchAddress(libraryBranchDetails.getLibraryBranchAddress());
+		
+		LibraryBranch updatedLibraryBranch = libraryBranchRepository.save(libraryBranch);
+		return updatedLibraryBranch;
 	}
 	
-	@RequestMapping(path="/lms/libraryBranch/line/{lineNo}", method=RequestMethod.GET)
-	public String getSingleLibraryBranch(@PathVariable(value = "lineNo") int count) {
-		List<LibraryBranch> libraryBranch = new LibraryBranchService().getSingleLibraryBranch(count);
-		JsonConverter converter = new JsonConverter();
-		String output = converter.convertToJson(libraryBranch);
-		return output;
+	//Delete a LibraryBranch
+	@DeleteMapping("/libraryBranch/{id}")
+	public ResponseEntity<?> deleteLibraryBranch(@PathVariable(value = "id") int libraryBranchId){
+		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
+				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
+		libraryBranchRepository.delete(libraryBranch);
+		
+		return ResponseEntity.ok().build();
 	}
-
+	
+	@GetMapping("/libraryBranches/count")
+	public int getLibraryBranchCount() {
+		int count = (int) libraryBranchRepository.count();
+		return count;
+	}
 }
+

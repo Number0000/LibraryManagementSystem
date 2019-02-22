@@ -2,65 +2,81 @@ package com.SmoothStack.SmoothStackLoginCase5.Controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.SmoothStack.SmoothStackLoginCase5.ControllerHelper.JsonConverter;
 import com.SmoothStack.SmoothStackLoginCase5.Entity.Book;
-import com.SmoothStack.SmoothStackLoginCase5.ServiceHelper.BookService;
+import com.SmoothStack.SmoothStackLoginCase5.Exception.ResourceNotFoundException;
+import com.SmoothStack.SmoothStackLoginCase5.Repository.BookRepository;
 
 @RestController
+@RequestMapping("/lms")
 public class BookController {
-
+	
 	@Autowired
-	BookService bookService;
+	BookRepository bookRepository;
 	
-	@RequestMapping(path="/lms/book", method=RequestMethod.GET)
-	public String getBook(){
-		List<Book> book = new BookService().getBook();
-		JsonConverter converter = new JsonConverter();
-		String output = converter.convertBookListToJson(book);
-		return output;
+	//Get All Book
+//	@RequestMapping(value="/books", method=RequestMethod.GET)
+	@GetMapping("/books")
+	public List<Book> getAllBook(){
+		return bookRepository.findAll();
 	}
 	
-	@RequestMapping(path="/lms/book/{book}", method=RequestMethod.POST)
-	public boolean addBook(@RequestBody Book book) {
-		return bookService.addBook(book);
+	//Create a new book
+	@PostMapping("/book")
+	public Book createBook(@Valid @RequestBody Book book) {
+		return bookRepository.save(book);
+		
 	}
 	
-//	@RequestMapping(path="/lms/book/returnList/{bookId}", method=RequestMethod.GET)
-//	public String getBookById(@PathVariable(value = "bookId") int bookId){
-//		List<Book> book = new BookService().getBookById(bookId);
-//		JsonConverter converter = new JsonConverter();
-//		String output = converter.convertBookListToJson(book);
-//		return output;
-//	}
-	
-	@RequestMapping(path="/lms/book/{bookId}", method=RequestMethod.GET)
-	public Book getBookByIdReturn(@PathVariable(value = "bookId") int bookId) {
-		return bookService.getBookByIdReturn(bookId);
+	//Get a Single Book
+	@GetMapping("/book/{id}")
+	public Book getBookById(@PathVariable(value = "id") int bookId) {
+		return bookRepository.findById(bookId)
+				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
 	}
 	
-	@RequestMapping(path="/lms/book/{book}", method=RequestMethod.PUT)
-	public boolean updateBook(@RequestBody Book book) {
-		return bookService.updateBook(book);
+	//Get a Single Author by line within authors
+	@GetMapping("/books/{line}")
+	public List<Book> getBookByLine(@PathVariable(value = "line") int line) {
+		Page<Book> bookPage = bookRepository.findAll(PageRequest.of(line-1, 1));
+		List<Book> book = bookPage.getContent();
+		return book;
 	}
 	
-	@RequestMapping(path="/lms/book/{book}", method=RequestMethod.DELETE)
-	public boolean deleteBook(@RequestBody Book book) {
-		return bookService.deleteBook(book);
+	//Update a Book
+	@PutMapping("/book/{id}")
+	public Book updateBook(@PathVariable(value = "id") int bookId,
+							@Valid @RequestBody Book bookDetails) {
+		Book book = bookRepository.findById(bookId)
+				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
+		book.setTitle(bookDetails.getTitle());
+		
+		Book updatedBook = bookRepository.save(book);
+		return updatedBook;
 	}
 	
-	@RequestMapping(path="/lms/book/line/{lineNo}", method=RequestMethod.GET)
-	public String getSingleBook(@PathVariable(value = "lineNo") int count) {
-		List<Book> book = new BookService().getSingleBook(count);
-		JsonConverter converter = new JsonConverter();
-		String output = converter.convertBookListToJson(book);
-		return output;
+	//Delete a Book
+	@DeleteMapping("/book/{id}")
+	public ResponseEntity<?> deleteBook(@PathVariable(value = "id") int bookId){
+		Book book = bookRepository.findById(bookId)
+				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
+		bookRepository.delete(book);
+		
+		return ResponseEntity.ok().build();
 	}
-	
 }
+
