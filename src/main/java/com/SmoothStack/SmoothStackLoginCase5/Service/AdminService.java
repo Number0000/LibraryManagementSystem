@@ -107,7 +107,7 @@ public class AdminService {
 	@PostMapping("/author")
 	public ResponseEntity<Author> addAuthor(@Valid @RequestBody Author author) {
 		authorRepository.save(author);
-		return new ResponseEntity<Author>(HttpStatus.CREATED);
+		return new ResponseEntity<Author>(author, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/book")
@@ -136,7 +136,7 @@ public class AdminService {
 		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
 				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
 		System.out.println("-----------" + libraryBranch);
-		
+	    	    
 		BookCopy newbookcopy = new BookCopy();
 		newbookcopy.setBook(book);;
 		newbookcopy.setLibraryBranch(libraryBranch);;
@@ -149,13 +149,13 @@ public class AdminService {
 	@PostMapping("/bookLoan")
 	public ResponseEntity<BookLoan> addBookLoan(@Valid @RequestBody BookLoan bookLoan) {
 		bookLoanRepository.save(bookLoan);
-		return new ResponseEntity<BookLoan>(HttpStatus.CREATED);
+		return new ResponseEntity<BookLoan>(bookLoan, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/borrower")
 	public ResponseEntity<Borrower> addBorrower(@Valid @RequestBody Borrower borrower) {
 		borrowerRepository.save(borrower);
-		return new ResponseEntity<Borrower>(HttpStatus.CREATED);
+		return new ResponseEntity<Borrower>(borrower, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/libraryBranch")
@@ -167,7 +167,7 @@ public class AdminService {
 	@PostMapping("/publisher")
 	public ResponseEntity<Publisher> addPublisher(@Valid @RequestBody Publisher publisher) {
 		publisherRepository.save(publisher);
-		return new ResponseEntity<Publisher>(HttpStatus.CREATED);
+		return new ResponseEntity<Publisher>(publisher, HttpStatus.CREATED);
 	}
 	
 	//Update
@@ -179,7 +179,7 @@ public class AdminService {
 		author.setAuthorName(authorDetails.getAuthorName());
 		
 		authorRepository.saveAndFlush(author);
-		return new ResponseEntity<Author>(HttpStatus.OK);
+		return new ResponseEntity<Author>(author, HttpStatus.OK);
 	}
 	
 	@PutMapping("/book/{id}")
@@ -216,7 +216,7 @@ public class AdminService {
 		BookCopy bookCopy = bookCopyRepository.getByBookIdAndBranchId(bookId, libraryBranchId);
 		bookCopy.incrementNumberOfCopies();
 		bookCopyRepository.saveAndFlush(bookCopy);
-		return new ResponseEntity<BookLoan>(HttpStatus.OK);
+		return new ResponseEntity<BookLoan>(bookLoan, HttpStatus.OK);
 	}
 	
 	@PutMapping("/borrower/{id}")
@@ -231,7 +231,7 @@ public class AdminService {
 		borrower.setBorrowerPassword(borrowerDetails.getBorrowerPassword());
 		
 		borrowerRepository.saveAndFlush(borrower);
-		return new ResponseEntity<Borrower>(HttpStatus.OK);
+		return new ResponseEntity<Borrower>(borrower, HttpStatus.OK);
 	}
 	
 	@PutMapping("/libraryBranch/{id}")
@@ -243,7 +243,7 @@ public class AdminService {
 		libraryBranch.setLibraryBranchAddress(libraryBranchDetails.getLibraryBranchAddress());
 		
 		libraryBranchRepository.saveAndFlush(libraryBranch);
-		return new ResponseEntity<LibraryBranch>(HttpStatus.OK);
+		return new ResponseEntity<LibraryBranch>(libraryBranch, HttpStatus.OK);
 	}
 	
 	@PutMapping("/publisher/{id}")
@@ -256,7 +256,7 @@ public class AdminService {
 		publisher.setPublisherPhone(publisherDetails.getPublisherPhone());
 		
 		publisherRepository.saveAndFlush(publisher);
-		return new ResponseEntity<Publisher>(HttpStatus.OK);
+		return new ResponseEntity<Publisher>(publisher, HttpStatus.OK);
 	}
 	
 	//Delete
