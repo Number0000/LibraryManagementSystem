@@ -1,14 +1,11 @@
 package com.SmoothStack.SmoothStackLoginCase5.Entity;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
-import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.PositiveOrZero;
@@ -18,16 +15,11 @@ import javax.validation.constraints.PositiveOrZero;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
 	allowGetters = true)
-public class BookLoan implements Serializable{
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class BookLoan{
 	
 	@EmbeddedId
 	private BookLoanId bookLoanId;
-		
+	
 	@PastOrPresent
 	@Column(name = "dateOut", nullable = false)
 	private LocalDate dateOut;
@@ -44,33 +36,26 @@ public class BookLoan implements Serializable{
 	@Column(name = "extended", nullable = false)
 	private int extended;
 	
-	@Column(name = "bookId")
+//  Not setter in this case, let the constructor give you the scope
+	public BookLoan() {}
+	
+	public BookLoan(Book book, LibraryBranch libraryBranch, Borrower borrower) {
+		this.bookLoanId = new BookLoanId(book, libraryBranch, borrower);
+	}
+	
 	public Book getBook() {
 		return bookLoanId.getBook();
 	}
-
-	public void setBook(Book book) {
-		this.bookLoanId.setBook(book);
-	}
 	
-	@Column(name = "branchId")
 	public LibraryBranch getLibraryBranch() {
 		return bookLoanId.getLibraryBranch();
 	}
-
-	public void setLibraryBranch(LibraryBranch libraryBranch) {
-		this.bookLoanId.setLibraryBranch(libraryBranch);;
-	}
 	
-	@Column(name = "cardNo")
 	public Borrower getBorrower() {
 		return bookLoanId.getBorrower();
 	}
-
-	public void setBorrower(Borrower borrower) {
-		this.bookLoanId.setBorrower(borrower);;
-	}
 	
+	//---
 	public LocalDate getDateOut() {
 		return dateOut;
 	}
@@ -79,16 +64,17 @@ public class BookLoan implements Serializable{
 		this.dateOut = dateOut;
 	}
 	
-	public void setDateOutToDueDate(LocalDate dueDate) {
-		this.dateOut = dueDate;
-	}
-
 	public LocalDate getDueDate() {
 		return dueDate;
 	}
 
 	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
+	}
+	
+	//custom
+	public void setDateOutToDueDate(LocalDate dueDate) {
+		this.dateOut = dueDate;
 	}
 	
 	public void setDueDateExtend7Day(LocalDate dueDate) {

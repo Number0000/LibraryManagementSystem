@@ -1,7 +1,7 @@
 package com.SmoothStack.SmoothStackLoginCase5.Service;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -33,8 +33,6 @@ import com.SmoothStack.SmoothStackLoginCase5.Repository.BookRepository;
 import com.SmoothStack.SmoothStackLoginCase5.Repository.BorrowerRepository;
 import com.SmoothStack.SmoothStackLoginCase5.Repository.LibraryBranchRepository;
 import com.SmoothStack.SmoothStackLoginCase5.Repository.PublisherRepository;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/admin")
@@ -105,69 +103,80 @@ public class AdminService {
 	
 	//Add
 	@PostMapping("/author")
-	public ResponseEntity<Author> addAuthor(@Valid @RequestBody Author author) {
-		authorRepository.save(author);
-		return new ResponseEntity<Author>(author, HttpStatus.CREATED);
+	public ResponseEntity<Author> addAuthor(@Valid @RequestBody Author authorDetails) {
+		authorRepository.save(authorDetails);
+		return new ResponseEntity<Author>(authorDetails, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/book")
-	public ResponseEntity<Book> addBook(@Valid @RequestBody Book book) {
-		int authorId = book.getAuthor().getAuthorId();
+	public ResponseEntity<Book> addBook(@Valid @RequestBody Book bookDetails) {
+		int authorId = bookDetails.getAuthor().getAuthorId();
 		Author author = authorRepository.findById(authorId)
 				.orElseThrow(()-> new ResourceNotFoundException("Author", "id", authorId));
-		int publisherId = book.getPublisher().getPublisherId();
+		int publisherId = bookDetails.getPublisher().getPublisherId();
 		Publisher publisher = publisherRepository.findById(publisherId)
 				.orElseThrow(()-> new ResourceNotFoundException("Publisher", "id", publisherId));
-		Book newbook = new Book();
-		newbook.setAuthor(author);
-		newbook.setPublisher(publisher);
-		newbook.setTitle(book.getTitle());
-		bookRepository.save(newbook);
-		return new ResponseEntity<Book>(newbook, HttpStatus.CREATED);
+		Book book = new Book();
+		book.setAuthor(author);
+		book.setPublisher(publisher);
+		book.setTitle(bookDetails.getTitle());
+		bookRepository.save(book);
+		return new ResponseEntity<Book>(book, HttpStatus.CREATED);
 	}
 	
+	//Query Param for limit scope
 	@PostMapping("/bookCopy")
 	public ResponseEntity<BookCopy> addBookCopy(@RequestParam(value = "bookId", defaultValue = "543", required = true) int bookId,
 			@RequestParam(value = "branchId", defaultValue = "1", required = true) int libraryBranchId,
-			@RequestBody BookCopy bookCopy) {
+			@Valid @RequestBody BookCopy bookCopyDetails) {
 		Book book = bookRepository.findById(bookId)
 				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
-		System.out.println("-----------" + book);
 		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
 				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
-		System.out.println("-----------" + libraryBranch);
-	    	    
-		BookCopy newbookcopy = new BookCopy();
-		newbookcopy.setBook(book);;
-		newbookcopy.setLibraryBranch(libraryBranch);;
-		newbookcopy.setNoOfCopies(bookCopy.getNoOfCopies());
-		System.out.println("-----------" + bookCopy);
-		bookCopyRepository.save(bookCopy);
-		return new ResponseEntity<BookCopy>(bookCopy, HttpStatus.CREATED);
+		
+		BookCopy bookcopy = new BookCopy(book, libraryBranch);
+		bookcopy.setNoOfCopies(bookCopyDetails.getNoOfCopies());
+		bookCopyRepository.save(bookcopy);
+		return new ResponseEntity<BookCopy>(bookcopy, HttpStatus.CREATED);
 	}
 	
+	//Query Param for limit scope
 	@PostMapping("/bookLoan")
-	public ResponseEntity<BookLoan> addBookLoan(@Valid @RequestBody BookLoan bookLoan) {
-		bookLoanRepository.save(bookLoan);
-		return new ResponseEntity<BookLoan>(bookLoan, HttpStatus.CREATED);
+	public ResponseEntity<BookLoan> addBookLoan(@RequestParam(value = "bookId", defaultValue = "543", required = true) int bookId,
+			@RequestParam(value = "branchId", defaultValue = "1", required = true) int libraryBranchId,
+			@RequestParam(value = "cardNo", defaultValue = "1", required = true) int cardNo) {
+		Book book = bookRepository.findById(bookId)
+				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
+		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
+				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
+		Borrower borrower = borrowerRepository.findById(cardNo)
+				.orElseThrow(()-> new ResourceNotFoundException("Borrower", "id", cardNo));
+		
+		BookLoan bookloan = new BookLoan(book, libraryBranch, borrower);
+		bookloan.setDateOut(LocalDate.now());
+		bookloan.setDueDateExtend7Day(LocalDate.now());
+		bookloan.setReturned(false);
+		bookloan.setExtended(0);
+		bookLoanRepository.save(bookloan);
+		return new ResponseEntity<BookLoan>(bookloan, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/borrower")
-	public ResponseEntity<Borrower> addBorrower(@Valid @RequestBody Borrower borrower) {
-		borrowerRepository.save(borrower);
-		return new ResponseEntity<Borrower>(borrower, HttpStatus.CREATED);
+	public ResponseEntity<Borrower> addBorrower(@Valid @RequestBody Borrower borrowerDetails) {
+		borrowerRepository.save(borrowerDetails);
+		return new ResponseEntity<Borrower>(borrowerDetails, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/libraryBranch")
-	public ResponseEntity<LibraryBranch> addLibraryBranch(@Valid @RequestBody LibraryBranch libraryBranch) {
-		libraryBranchRepository.save(libraryBranch);
-		return new ResponseEntity<LibraryBranch>(HttpStatus.CREATED);
+	public ResponseEntity<LibraryBranch> addLibraryBranch(@Valid @RequestBody LibraryBranch libraryBranchDetails) {
+		libraryBranchRepository.save(libraryBranchDetails);
+		return new ResponseEntity<LibraryBranch>(libraryBranchDetails, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/publisher")
-	public ResponseEntity<Publisher> addPublisher(@Valid @RequestBody Publisher publisher) {
-		publisherRepository.save(publisher);
-		return new ResponseEntity<Publisher>(publisher, HttpStatus.CREATED);
+	public ResponseEntity<Publisher> addPublisher(@Valid @RequestBody Publisher publisherDetails) {
+		publisherRepository.save(publisherDetails);
+		return new ResponseEntity<Publisher>(publisherDetails, HttpStatus.CREATED);
 	}
 	
 	//Update
@@ -193,30 +202,41 @@ public class AdminService {
 		return new ResponseEntity<Book>(book, HttpStatus.OK);
 	}
 	
-	@PutMapping("/bookCopy/{bookId}/{libraryBranchId}")
-	public ResponseEntity<BookCopy> updateBookCopy(@PathVariable(value = "bookId") int bookId,
-			@PathVariable(value = "libraryBranchId") int libraryBranchId,
+	//Query Param for limit scope
+	@PutMapping("/bookCopy")
+	public ResponseEntity<BookCopy> updateBookCopy(@RequestParam(value = "bookId", defaultValue = "543", required = true) int bookId,
+			@RequestParam(value = "branchId", defaultValue = "1", required = true) int libraryBranchId,
 			@Valid @RequestBody BookCopy bookCopyDetails){
-		BookCopy bookCopy = bookCopyRepository.getByBookIdAndBranchId(bookId, libraryBranchId);
-//				.orElseThrow(()-> new ResourceNotFoundException("Author", "id", authorId));
-		bookCopy.setNoOfCopies(bookCopyDetails.getNoOfCopies());
+		Book book = bookRepository.findById(bookId)
+				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
+		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
+				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
 		
-		bookCopyRepository.saveAndFlush(bookCopy);
-		return new ResponseEntity<BookCopy>(bookCopy, HttpStatus.OK);
+		BookCopy bookcopy = new BookCopy(book, libraryBranch);
+		bookcopy.setNoOfCopies(bookCopyDetails.getNoOfCopies());
+		bookCopyRepository.saveAndFlush(bookcopy);
+		return new ResponseEntity<BookCopy>(bookcopy, HttpStatus.OK);
 	}
 	
+	//Query Param for limit scope
 	@PutMapping("/returnBookLoan/{bookId}/{libraryBranchId}/{cardNo}")
-	public ResponseEntity<BookLoan> returnBookLoan(@PathVariable(value = "bookId") int bookId,
-			@PathVariable(value = "libraryBranchId") int libraryBranchId,
-			@PathVariable(value = "cardNo") int cardNo){
-		BookLoan bookLoan = bookLoanRepository.getByBookIdAndBranchIdAndCardNo(bookId, libraryBranchId, cardNo);
-//				.orElseThrow(()-> new ResourceNotFoundException("Author", "id", authorId));
-		bookLoan.setReturned(true);
-		bookLoanRepository.saveAndFlush(bookLoan);
+	public ResponseEntity<BookLoan> returnBookLoan(@RequestParam(value = "bookId", defaultValue = "543", required = true) int bookId,
+			@RequestParam(value = "branchId", defaultValue = "1", required = true) int libraryBranchId,
+			@RequestParam(value = "cardNo", defaultValue = "1", required = true) int cardNo){
+		Book book = bookRepository.findById(bookId)
+				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
+		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
+				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
+		Borrower borrower = borrowerRepository.findById(cardNo)
+				.orElseThrow(()-> new ResourceNotFoundException("Borrower", "id", cardNo));
+		
+		BookLoan bookloan = new BookLoan(book, libraryBranch, borrower);
+		bookloan.setReturned(true);
+		bookLoanRepository.saveAndFlush(bookloan);
 		BookCopy bookCopy = bookCopyRepository.getByBookIdAndBranchId(bookId, libraryBranchId);
 		bookCopy.incrementNumberOfCopies();
 		bookCopyRepository.saveAndFlush(bookCopy);
-		return new ResponseEntity<BookLoan>(bookLoan, HttpStatus.OK);
+		return new ResponseEntity<BookLoan>(bookloan, HttpStatus.OK);
 	}
 	
 	@PutMapping("/borrower/{id}")
@@ -281,7 +301,12 @@ public class AdminService {
 	@DeleteMapping("/bookCopy/{bookId}/{libraryBranchId}")
 	public ResponseEntity<BookCopy> deleteBookCopy(@PathVariable(value = "bookId") int bookId,
 			@PathVariable(value = "libraryBranchId") int libraryBranchId){
-		BookCopy bookCopy = bookCopyRepository.getByBookIdAndBranchId(bookId, libraryBranchId);
+		Book book = bookRepository.findById(bookId)
+				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
+		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
+				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
+		
+		BookCopy bookCopy = new BookCopy(book, libraryBranch);
 //				.orElseThrow(()-> new ResourceNotFoundException("bookCopy", "id", authorId));
 		bookCopyRepository.delete(bookCopy);
 		
@@ -292,9 +317,15 @@ public class AdminService {
 	public ResponseEntity<BookLoan> deleteBookLoan(@PathVariable(value = "bookId") int bookId,
 			@PathVariable(value = "libraryBranchId") int libraryBranchId,
 			@PathVariable(value = "cardNo") int cardNo){
-		BookLoan bookLoan = bookLoanRepository.getByBookIdAndBranchIdAndCardNo(bookId, libraryBranchId, cardNo);
-//				.orElseThrow(()-> new ResourceNotFoundException("BookLoan", "id", authorId));
-		bookLoanRepository.delete(bookLoan);
+		Book book = bookRepository.findById(bookId)
+				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
+		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
+				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
+		Borrower borrower = borrowerRepository.findById(cardNo)
+				.orElseThrow(()-> new ResourceNotFoundException("Borrower", "id", cardNo));
+		
+		BookLoan bookloan = new BookLoan(book, libraryBranch, borrower);
+		bookLoanRepository.delete(bookloan);
 		
 		return new ResponseEntity<BookLoan>(HttpStatus.ACCEPTED);
 	}
@@ -327,23 +358,30 @@ public class AdminService {
 	}
 	
 	//Override
-	@PutMapping("/extendBookLoan/{bookId}/{libraryBranchId}/{cardNo}")
-	public ResponseEntity<BookLoan> extendBookLoan(@PathVariable(value = "bookId") int bookId,
-			@PathVariable(value = "libraryBranchId") int libraryBranchId,
-			@PathVariable(value = "cardNo") int cardNo){
-		BookLoan bookLoan = bookLoanRepository.getByBookIdAndBranchIdAndCardNo(bookId, libraryBranchId, cardNo);
-//				.orElseThrow(()-> new ResourceNotFoundException("Author", "id", authorId));
-		if (bookLoan.getExtended() > 3 || bookLoan.isReturned() == true) {
-			return new ResponseEntity<BookLoan>(bookLoan, HttpStatus.ALREADY_REPORTED);
-		}
-		else if(bookLoan.getExtended() < 3 && bookLoan.getExtended() > 0) {
-			bookLoan.setDateOutToDueDate(bookLoan.getDueDate());
-			bookLoan.setDueDateExtend7Day(bookLoan.getDueDate());
-			bookLoan.setExtended1Time(bookLoan.getExtended());
+	//Query param for limit scope
+	@PutMapping("/extendBookLoan")
+	public ResponseEntity<BookLoan> extendBookLoan(@RequestParam(value = "bookId", defaultValue = "543", required = true) int bookId,
+			@RequestParam(value = "branchId", defaultValue = "1", required = true) int libraryBranchId,
+			@RequestParam(value = "cardNo", defaultValue = "1", required = true) int cardNo){
+		Book book = bookRepository.findById(bookId)
+				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
+		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
+				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
+		Borrower borrower = borrowerRepository.findById(cardNo)
+				.orElseThrow(()-> new ResourceNotFoundException("Borrower", "id", cardNo));
 		
-			bookLoanRepository.saveAndFlush(bookLoan);
+		BookLoan bookloan = new BookLoan(book, libraryBranch, borrower);
+		if (bookloan.getExtended() > 3 || bookloan.isReturned() == true) {
+			return new ResponseEntity<BookLoan>(bookloan, HttpStatus.ALREADY_REPORTED);
 		}
-		return new ResponseEntity<BookLoan>(bookLoan, HttpStatus.OK);
+		else if(bookloan.getExtended() < 3 && bookloan.getExtended() > 0) {
+			bookloan.setDateOutToDueDate(bookloan.getDueDate());
+			bookloan.setDueDateExtend7Day(bookloan.getDueDate());
+			bookloan.setExtended1Time(bookloan.getExtended());
+		
+			bookLoanRepository.saveAndFlush(bookloan);
+		}
+		return new ResponseEntity<BookLoan>(bookloan, HttpStatus.OK);
 	}
 	
 }

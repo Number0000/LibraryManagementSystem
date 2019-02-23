@@ -29,20 +29,20 @@ public class BookCopyId implements Serializable{
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private LibraryBranch libraryBranch;
 	
+	public BookCopyId() {}
+	
+	//over here this set the bookCopy pk
+	public BookCopyId(Book book, LibraryBranch libraryBranch) {
+		this.book = book;
+		this.libraryBranch = libraryBranch;
+	}
+	
 	public Book getBook() {
 		return book;
 	}
 
-	public void setBook(Book book) {
-		this.book = book;
-	}
-
 	public LibraryBranch getLibraryBranch() {
 		return libraryBranch;
-	}
-
-	public void setLibraryBranch(LibraryBranch libraryBranch) {
-		this.libraryBranch = libraryBranch;
 	}
 	
 }

@@ -1,6 +1,11 @@
 package com.SmoothStack.SmoothStackLoginCase5.Exception;
 
 public class ResourceNotFoundException extends RuntimeException{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private String resourceName;
 	private String fieldName;
 	private Object fieldValue;
