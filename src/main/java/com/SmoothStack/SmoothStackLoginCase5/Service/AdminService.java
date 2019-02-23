@@ -243,7 +243,7 @@ public class AdminService {
 			bookCopyRepository.saveAndFlush(bookCopy);
 			return new ResponseEntity<BookLoan>(bookloan, HttpStatus.OK);
 		} else {
-			return new ResponseEntity<BookLoan>(bookloan, HttpStatus.ALREADY_REPORTED);
+			return new ResponseEntity<BookLoan>(bookloan, HttpStatus.CONFLICT);
 		}
 	}
 	
