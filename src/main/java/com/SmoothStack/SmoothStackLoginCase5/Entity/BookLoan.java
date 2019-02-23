@@ -6,7 +6,12 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.PositiveOrZero;
 
 @Entity(name = "tbl_book_loans")
 @Table(name = "tbl_book_loans")
@@ -23,19 +28,19 @@ public class BookLoan implements Serializable{
 	@EmbeddedId
 	private BookLoanId bookLoanId;
 		
-	@NotBlank
+	@PastOrPresent
 	@Column(name = "dateOut", nullable = false)
 	private LocalDate dateOut;
 	
-	@NotBlank
+	@FutureOrPresent
 	@Column(name = "dueDate", nullable = false)
 	private LocalDate dueDate;
 	
-	@NotBlank
+	@NotNull
 	@Column(name = "returned", nullable = false)
-	private boolean returned;
+	private Boolean returned;
 	
-	@NotBlank
+	@PositiveOrZero
 	@Column(name = "extended", nullable = false)
 	private int extended;
 	

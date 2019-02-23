@@ -16,11 +16,11 @@ import static springfox.documentation.builders.PathSelectors.regex;
 public class SwaggerConfig {                                    
     @Bean
     public Docket api() { 
-        return new Docket(DocumentationType.SWAGGER_2).groupName("LibraryManagementSystem").apiInfo(apiInfo()).select()
-          .paths(regex("/admin.*")).build();                                           
+        return new Docket(DocumentationType.SWAGGER_2).groupName("LibraryManagementSystemMono").apiInfo(apiInfo()).select()
+          .paths(regex("/admin.*")).build();                                         
     }
     
 	private ApiInfo apiInfo() {
-    	return new ApiInfoBuilder().title("LibraryManagementSystem").version("1.0").build();
+    	return new ApiInfoBuilder().title("LibraryManagementSystemMono").version("1.0").build();
     }
 }

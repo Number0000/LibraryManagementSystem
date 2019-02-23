@@ -1,6 +1,7 @@
 package com.SmoothStack.SmoothStackLoginCase5.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.SmoothStack.SmoothStackLoginCase5.Entity.Author;
@@ -31,6 +33,8 @@ import com.SmoothStack.SmoothStackLoginCase5.Repository.BookRepository;
 import com.SmoothStack.SmoothStackLoginCase5.Repository.BorrowerRepository;
 import com.SmoothStack.SmoothStackLoginCase5.Repository.LibraryBranchRepository;
 import com.SmoothStack.SmoothStackLoginCase5.Repository.PublisherRepository;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/admin")
@@ -108,14 +112,38 @@ public class AdminService {
 	
 	@PostMapping("/book")
 	public ResponseEntity<Book> addBook(@Valid @RequestBody Book book) {
-		bookRepository.save(book);
-		return new ResponseEntity<Book>(HttpStatus.CREATED);
+		int authorId = book.getAuthor().getAuthorId();
+		Author author = authorRepository.findById(authorId)
+				.orElseThrow(()-> new ResourceNotFoundException("Author", "id", authorId));
+		int publisherId = book.getPublisher().getPublisherId();
+		Publisher publisher = publisherRepository.findById(publisherId)
+				.orElseThrow(()-> new ResourceNotFoundException("Publisher", "id", publisherId));
+		Book newbook = new Book();
+		newbook.setAuthor(author);
+		newbook.setPublisher(publisher);
+		newbook.setTitle(book.getTitle());
+		bookRepository.save(newbook);
+		return new ResponseEntity<Book>(newbook, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/bookCopy")
-	public ResponseEntity<BookCopy> addBookCopy(@Valid @RequestBody BookCopy bookCopy) {
+	public ResponseEntity<BookCopy> addBookCopy(@RequestParam(value = "bookId", defaultValue = "543", required = true) int bookId,
+			@RequestParam(value = "branchId", defaultValue = "1", required = true) int libraryBranchId,
+			@RequestBody BookCopy bookCopy) {
+		Book book = bookRepository.findById(bookId)
+				.orElseThrow(()-> new ResourceNotFoundException("Book", "id", bookId));
+		System.out.println("-----------" + book);
+		LibraryBranch libraryBranch = libraryBranchRepository.findById(libraryBranchId)
+				.orElseThrow(()-> new ResourceNotFoundException("LibraryBranch", "id", libraryBranchId));
+		System.out.println("-----------" + libraryBranch);
+		
+		BookCopy newbookcopy = new BookCopy();
+		newbookcopy.setBook(book);;
+		newbookcopy.setLibraryBranch(libraryBranch);;
+		newbookcopy.setNoOfCopies(bookCopy.getNoOfCopies());
+		System.out.println("-----------" + bookCopy);
 		bookCopyRepository.save(bookCopy);
-		return new ResponseEntity<BookCopy>(HttpStatus.CREATED);
+		return new ResponseEntity<BookCopy>(bookCopy, HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/bookLoan")
@@ -162,7 +190,7 @@ public class AdminService {
 		book.setTitle(bookDetails.getTitle());
 		
 		bookRepository.saveAndFlush(book);
-		return new ResponseEntity<Book>(HttpStatus.OK);
+		return new ResponseEntity<Book>(book, HttpStatus.OK);
 	}
 	
 	@PutMapping("/bookCopy/{bookId}/{libraryBranchId}")
@@ -174,19 +202,20 @@ public class AdminService {
 		bookCopy.setNoOfCopies(bookCopyDetails.getNoOfCopies());
 		
 		bookCopyRepository.saveAndFlush(bookCopy);
-		return new ResponseEntity<BookCopy>(HttpStatus.OK);
+		return new ResponseEntity<BookCopy>(bookCopy, HttpStatus.OK);
 	}
-	
-
 	
 	@PutMapping("/returnBookLoan/{bookId}/{libraryBranchId}/{cardNo}")
 	public ResponseEntity<BookLoan> returnBookLoan(@PathVariable(value = "bookId") int bookId,
-			@PathVariable(value = "libraryBranchid") int libraryBranchId,
+			@PathVariable(value = "libraryBranchId") int libraryBranchId,
 			@PathVariable(value = "cardNo") int cardNo){
 		BookLoan bookLoan = bookLoanRepository.getByBookIdAndBranchIdAndCardNo(bookId, libraryBranchId, cardNo);
 //				.orElseThrow(()-> new ResourceNotFoundException("Author", "id", authorId));
 		bookLoan.setReturned(true);
 		bookLoanRepository.saveAndFlush(bookLoan);
+		BookCopy bookCopy = bookCopyRepository.getByBookIdAndBranchId(bookId, libraryBranchId);
+		bookCopy.incrementNumberOfCopies();
+		bookCopyRepository.saveAndFlush(bookCopy);
 		return new ResponseEntity<BookLoan>(HttpStatus.OK);
 	}
 	
@@ -260,8 +289,8 @@ public class AdminService {
 	}
 	
 	@DeleteMapping("/bookLoan/{bookId}/{libraryBranchId}/{cardNo}")
-	public ResponseEntity<BookLoan> deleteAuthor(@PathVariable(value = "bookId") int bookId,
-			@PathVariable(value = "libraryBranchid") int libraryBranchId,
+	public ResponseEntity<BookLoan> deleteBookLoan(@PathVariable(value = "bookId") int bookId,
+			@PathVariable(value = "libraryBranchId") int libraryBranchId,
 			@PathVariable(value = "cardNo") int cardNo){
 		BookLoan bookLoan = bookLoanRepository.getByBookIdAndBranchIdAndCardNo(bookId, libraryBranchId, cardNo);
 //				.orElseThrow(()-> new ResourceNotFoundException("BookLoan", "id", authorId));
@@ -300,12 +329,12 @@ public class AdminService {
 	//Override
 	@PutMapping("/extendBookLoan/{bookId}/{libraryBranchId}/{cardNo}")
 	public ResponseEntity<BookLoan> extendBookLoan(@PathVariable(value = "bookId") int bookId,
-			@PathVariable(value = "libraryBranchid") int libraryBranchId,
+			@PathVariable(value = "libraryBranchId") int libraryBranchId,
 			@PathVariable(value = "cardNo") int cardNo){
 		BookLoan bookLoan = bookLoanRepository.getByBookIdAndBranchIdAndCardNo(bookId, libraryBranchId, cardNo);
 //				.orElseThrow(()-> new ResourceNotFoundException("Author", "id", authorId));
-		if (bookLoan.getExtended() > 3) {
-			return new ResponseEntity<BookLoan>(HttpStatus.ALREADY_REPORTED);
+		if (bookLoan.getExtended() > 3 || bookLoan.isReturned() == true) {
+			return new ResponseEntity<BookLoan>(bookLoan, HttpStatus.ALREADY_REPORTED);
 		}
 		else if(bookLoan.getExtended() < 3 && bookLoan.getExtended() > 0) {
 			bookLoan.setDateOutToDueDate(bookLoan.getDueDate());
@@ -314,7 +343,7 @@ public class AdminService {
 		
 			bookLoanRepository.saveAndFlush(bookLoan);
 		}
-		return new ResponseEntity<BookLoan>(HttpStatus.OK);
+		return new ResponseEntity<BookLoan>(bookLoan, HttpStatus.OK);
 	}
 	
 }

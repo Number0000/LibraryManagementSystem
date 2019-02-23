@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 
 @Entity(name = "tbl_book_copies")
 @Table(name = "tbl_book_copies")
@@ -21,10 +23,11 @@ public class BookCopy implements Serializable{
 	@EmbeddedId
 	private BookCopyId bookCopyId;
 		
-	@NotBlank
+	@PositiveOrZero
 	@Column(name = "noOfCopies", nullable = false)
 	private int noOfCopies;
 	
+	@NotNull
 	@Column(name = "bookId")
 	public Book getBook() {
 		return bookCopyId.getBook();
@@ -34,6 +37,7 @@ public class BookCopy implements Serializable{
 		this.bookCopyId.setBook(book);
 	}
 	
+	@NotNull
 	@Column(name = "branchId")
 	public LibraryBranch getLibraryBranch() {
 		return bookCopyId.getLibraryBranch();

@@ -83,7 +83,7 @@ public class BorrowerService {
 	
 	@PutMapping("/returnBookLoan/{bookId}/{libraryBranchId}/{cardNo}")
 	public ResponseEntity<BookLoan> returnBookLoan(@PathVariable(value = "bookId") int bookId,
-			@PathVariable(value = "libraryBranchid") int libraryBranchId,
+			@PathVariable(value = "libraryBranchId") int libraryBranchId,
 			@PathVariable(value = "cardNo") int cardNo){
 		BookLoan bookLoan = bookLoanRepository.getByBookIdAndBranchIdAndCardNo(bookId, libraryBranchId, cardNo);
 //				.orElseThrow(()-> new ResourceNotFoundException("Author", "id", authorId));
