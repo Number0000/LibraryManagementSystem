@@ -1,5 +1,6 @@
 package com.SmoothStack.SmoothStackLoginCase5.Entity;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,8 +16,13 @@ import javax.validation.constraints.PositiveOrZero;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
 	allowGetters = true)
-public class BookLoan{
+public class BookLoan implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@EmbeddedId
 	private BookLoanId bookLoanId;
 	

@@ -2,6 +2,9 @@ package com.SmoothStack.SmoothStackLoginCase5.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.io.Serializable;
+
 import javax.persistence.*;
 import javax.validation.constraints.PositiveOrZero;
 
@@ -10,8 +13,13 @@ import javax.validation.constraints.PositiveOrZero;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
 	allowGetters = true)
-public class BookCopy{
+public class BookCopy implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@EmbeddedId
 	private BookCopyId bookCopyId;
 		
