@@ -11,10 +11,10 @@ import com.SmoothStack.SmoothStackLoginCase5.Dao.ILibraryBranchDao;
 import com.SmoothStack.SmoothStackLoginCase5.Entity.LibraryBranch;
 
 public class LibraryBranchDao implements ILibraryBranchDao {
-	
-	public List<LibraryBranch> findAll(Connection conn){
+
+	public List<LibraryBranch> findAll(Connection conn) {
 		List<LibraryBranch> libraryBranchList = new ArrayList<>();
-		
+
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 		LibraryBranch libraryBranch;
@@ -22,11 +22,11 @@ public class LibraryBranchDao implements ILibraryBranchDao {
 		try {
 			prepareStatement = conn.prepareStatement(sqlQuery);
 			resultSet = prepareStatement.executeQuery();
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				libraryBranch = new LibraryBranch();
-				libraryBranch.setBranchId(resultSet.getInt("branchId"));
-				libraryBranch.setBranchName(resultSet.getString("branchName"));
-				libraryBranch.setBranchAddress(resultSet.getString("branchAddress"));
+				libraryBranch.setLibraryBranchId(resultSet.getInt("branchId"));
+				libraryBranch.setLibraryBranchName(resultSet.getString("branchName"));
+				libraryBranch.setLibraryBranchAddress(resultSet.getString("branchAddress"));
 				libraryBranchList.add(libraryBranch);
 			}
 		} catch (SQLException e) {
@@ -40,15 +40,16 @@ public class LibraryBranchDao implements ILibraryBranchDao {
 	public boolean addLibraryBranch(Connection conn, LibraryBranch libraryBranch) {
 		// TODO Auto-generated method stub
 		PreparedStatement prepareStatement = null;
-		boolean reply = false; int replyInt = 0;
+		boolean reply = false;
+		int replyInt = 0;
 		String sqlQuery = "INSERT INTO `lms`.`tbl_library_branch` (`branchId`, `branchName`, `branchAddress`) VALUES (?, ?, ?);";
 		try {
 			prepareStatement = conn.prepareStatement(sqlQuery);
-			prepareStatement.setInt(1, libraryBranch.getBranchId());
-			prepareStatement.setString(2, libraryBranch.getBranchName());
-			prepareStatement.setString(3, libraryBranch.getBranchAddress());
+			prepareStatement.setInt(1, libraryBranch.getLibraryBranchId());
+			prepareStatement.setString(2, libraryBranch.getLibraryBranchName());
+			prepareStatement.setString(3, libraryBranch.getLibraryBranchAddress());
 			replyInt = prepareStatement.executeUpdate();
-			if(replyInt == 1) {
+			if (replyInt == 1) {
 				reply = true;
 			}
 		} catch (SQLException e) {
@@ -57,9 +58,9 @@ public class LibraryBranchDao implements ILibraryBranchDao {
 		}
 		return reply;
 	}
-	
+
 	@SuppressWarnings("null")
-	public List<LibraryBranch> getLibraryBranchById(Connection conn, int branchId){
+	public List<LibraryBranch> getLibraryBranchById(Connection conn, int branchId) {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 		String sqlQuery = "SELECT * FROM `lms`.`tbl_library_branch` WHERE `lms`.`tbl_library_branch`.`branchId` = ?;";
@@ -69,11 +70,11 @@ public class LibraryBranchDao implements ILibraryBranchDao {
 			prepareStatement = conn.prepareStatement(sqlQuery);
 			prepareStatement.setInt(1, branchId);
 			System.out.println(prepareStatement.executeUpdate());
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				libraryBranch = new LibraryBranch();
-				libraryBranch.setBranchId(resultSet.getInt("branchId"));
-				libraryBranch.setBranchName(resultSet.getString("branchName"));
-				libraryBranch.setBranchAddress(resultSet.getString("branchAddress"));
+				libraryBranch.setLibraryBranchId(resultSet.getInt("branchId"));
+				libraryBranch.setLibraryBranchName(resultSet.getString("branchName"));
+				libraryBranch.setLibraryBranchAddress(resultSet.getString("branchAddress"));
 				libraryBranchList.add(libraryBranch);
 			}
 		} catch (SQLException e) {
@@ -82,9 +83,9 @@ public class LibraryBranchDao implements ILibraryBranchDao {
 		}
 		return libraryBranchList;
 	}
-	
+
 	@SuppressWarnings("null")
-	public LibraryBranch getLibraryBranchByIdReturn(Connection conn, int branchId){
+	public LibraryBranch getLibraryBranchByIdReturn(Connection conn, int branchId) {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 		String sqlQuery = "SELECT * FROM `lms`.`tbl_library_branch` WHERE `lms`.`tbl_library_branch`.`branchId` = ?;";
@@ -93,11 +94,11 @@ public class LibraryBranchDao implements ILibraryBranchDao {
 			prepareStatement = conn.prepareStatement(sqlQuery);
 			prepareStatement.setInt(1, branchId);
 			System.out.println(prepareStatement.executeUpdate());
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				libraryBranch = new LibraryBranch();
-				libraryBranch.setBranchId(resultSet.getInt("branchId"));
-				libraryBranch.setBranchName(resultSet.getString("branchName"));
-				libraryBranch.setBranchAddress(resultSet.getString("branchAddress"));
+				libraryBranch.setLibraryBranchId(resultSet.getInt("branchId"));
+				libraryBranch.setLibraryBranchName(resultSet.getString("branchName"));
+				libraryBranch.setLibraryBranchAddress(resultSet.getString("branchAddress"));
 				return libraryBranch;
 			}
 		} catch (SQLException e) {
@@ -106,20 +107,21 @@ public class LibraryBranchDao implements ILibraryBranchDao {
 		}
 		return libraryBranch;
 	}
-		
-	public boolean updateLibraryBranch(Connection conn, LibraryBranch libraryBranch){
+
+	public boolean updateLibraryBranch(Connection conn, LibraryBranch libraryBranch) {
 		PreparedStatement prepareStatement = null;
-		boolean reply = false; int replyInt = 0;
+		boolean reply = false;
+		int replyInt = 0;
 		String sqlQuery = "UPDATE `lms`.`tbl_library_branch` SET `branchName` = ?, `branchAddress` = ? WHERE (`branchId` = ?);";
 		try {
 			prepareStatement = conn.prepareStatement(sqlQuery);
 
-			prepareStatement.setString(1, libraryBranch.getBranchName());
-			prepareStatement.setString(2, libraryBranch.getBranchAddress());			
-			prepareStatement.setInt(3, libraryBranch.getBranchId());
+			prepareStatement.setString(1, libraryBranch.getLibraryBranchName());
+			prepareStatement.setString(2, libraryBranch.getLibraryBranchAddress());
+			prepareStatement.setInt(3, libraryBranch.getLibraryBranchId());
 
 			replyInt = prepareStatement.executeUpdate();
-			if(replyInt == 1) {
+			if (replyInt == 1) {
 				reply = true;
 			}
 		} catch (SQLException e) {
@@ -129,15 +131,16 @@ public class LibraryBranchDao implements ILibraryBranchDao {
 		return reply;
 	}
 
-	public boolean deleteLibraryBranchById(Connection conn, LibraryBranch libraryBranch){
+	public boolean deleteLibraryBranchById(Connection conn, LibraryBranch libraryBranch) {
 		PreparedStatement prepareStatement = null;
-		boolean reply = false; int replyInt = 0;
+		boolean reply = false;
+		int replyInt = 0;
 		String sqlQuery = "DELETE FROM `lms`.`tbl_library_branch` WHERE `lms`.`tbl_library_branch`.`branchId` = ?;";
 		try {
 			prepareStatement = conn.prepareStatement(sqlQuery);
-			prepareStatement.setInt(1, libraryBranch.getBranchId());
+			prepareStatement.setInt(1, libraryBranch.getLibraryBranchId());
 			replyInt = prepareStatement.executeUpdate();
-			if(replyInt == 1) {
+			if (replyInt == 1) {
 				reply = true;
 			}
 		} catch (SQLException e) {
@@ -146,23 +149,23 @@ public class LibraryBranchDao implements ILibraryBranchDao {
 		}
 		return reply;
 	}
-	
+
 	@SuppressWarnings("null")
-	public List<LibraryBranch> getSingleLibraryBranch(Connection conn, int count){
+	public List<LibraryBranch> getSingleLibraryBranch(Connection conn, int count) {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 		LibraryBranch libraryBranch = null;
 		List<LibraryBranch> libraryBranchList = null;
 		String sqlQuery = "SELECT * FROM `lms`.`tbl_library_branch` LIMIT ?, 1;";
-		try{
+		try {
 			prepareStatement = conn.prepareStatement(sqlQuery);
-			prepareStatement.setInt(1, count-1);
+			prepareStatement.setInt(1, count - 1);
 			resultSet = prepareStatement.executeQuery();
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				libraryBranch = new LibraryBranch();
-				libraryBranch.setBranchId(resultSet.getInt("branchId"));
-				libraryBranch.setBranchName(resultSet.getString("branchName"));
-				libraryBranch.setBranchAddress(resultSet.getString("branchAddress"));
+				libraryBranch.setLibraryBranchId(resultSet.getInt("branchId"));
+				libraryBranch.setLibraryBranchName(resultSet.getString("branchName"));
+				libraryBranch.setLibraryBranchAddress(resultSet.getString("branchAddress"));
 				libraryBranchList.add(libraryBranch);
 			}
 		} catch (SQLException e) {

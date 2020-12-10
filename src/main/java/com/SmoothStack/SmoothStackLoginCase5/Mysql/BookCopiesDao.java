@@ -15,19 +15,20 @@ import com.SmoothStack.SmoothStackLoginCase5.Entity.LibraryBranch;
 public class BookCopiesDao implements IBookCopiesDao {
 	BookDao bookDao = new BookDao();
 	LibraryBranchDao libraryBranchDao = new LibraryBranchDao();
-	
-	public List<BookCopies> findAll(Connection conn){
+
+	public List<BookCopies> findAll(Connection conn) {
 		List<BookCopies> bookCopiesList = new ArrayList<>();
-		
+
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 		BookCopies bookCopies;
-		Book book; LibraryBranch libraryBranch;
+		Book book;
+		LibraryBranch libraryBranch;
 		String sqlQuery = "SELECT * FROM `lms`.`tbl_book_copies`;";
 		try {
 			prepareStatement = conn.prepareStatement(sqlQuery);
 			resultSet = prepareStatement.executeQuery();
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				bookCopies = new BookCopies();
 				book = bookDao.getBookByIdReturn(conn, resultSet.getInt("bookId"));
 				libraryBranch = libraryBranchDao.getLibraryBranchByIdReturn(conn, resultSet.getInt("branchId"));
@@ -47,19 +48,21 @@ public class BookCopiesDao implements IBookCopiesDao {
 	public boolean addBookCopies(Connection conn, BookCopies bookCopies) {
 		// TODO Auto-generated method stub
 		PreparedStatement prepareStatement = null;
-		Book book; LibraryBranch libraryBranch;
-		boolean reply = false; int replyInt = 0;
+		Book book;
+		LibraryBranch libraryBranch;
+		boolean reply = false;
+		int replyInt = 0;
 		String sqlQuery = "INSERT INTO `lms`.`tbl_book_copies` (`bookId`, `branchId`, `noOfCopies`) VALUES (?, ?, ?);";
 		try {
 			book = bookCopies.getBookId();
 			libraryBranch = bookCopies.getBranchId();
 			prepareStatement = conn.prepareStatement(sqlQuery);
-			
+
 			prepareStatement.setInt(1, book.getBookId());
-			prepareStatement.setInt(2, libraryBranch.getBranchId());
+			prepareStatement.setInt(2, libraryBranch.getLibraryBranchId());
 			prepareStatement.setInt(3, bookCopies.getNoOfCopies());
 			replyInt = prepareStatement.executeUpdate();
-			if(replyInt == 1) {
+			if (replyInt == 1) {
 				reply = true;
 			}
 		} catch (SQLException e) {
@@ -68,21 +71,22 @@ public class BookCopiesDao implements IBookCopiesDao {
 		}
 		return reply;
 	}
-	
+
 	@SuppressWarnings("null")
-	public List<BookCopies> getBookCopiesById(Connection conn,int bookId, int branchId){
+	public List<BookCopies> getBookCopiesById(Connection conn, int bookId, int branchId) {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 		String sqlQuery = "SELECT * FROM `lms`.`tbl_book_copies` WHERE (`lms`.`tbl_book_copies`.`bookId` = ? AND `lms`.`tbl_book_copies`.`branchId` = ?);";
 		BookCopies bookCopies;
-		Book book; LibraryBranch libraryBranch;
+		Book book;
+		LibraryBranch libraryBranch;
 		List<BookCopies> bookCopiesList = null;
 		try {
 			prepareStatement = conn.prepareStatement(sqlQuery);
 			prepareStatement.setInt(1, bookId);
 			prepareStatement.setInt(2, branchId);
 			System.out.println(prepareStatement.executeUpdate());
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				bookCopies = new BookCopies();
 				book = bookDao.getBookByIdReturn(conn, resultSet.getInt("bookId"));
 				libraryBranch = libraryBranchDao.getLibraryBranchByIdReturn(conn, resultSet.getInt("branchId"));
@@ -97,24 +101,25 @@ public class BookCopiesDao implements IBookCopiesDao {
 		}
 		return bookCopiesList;
 	}
-	
+
 	@SuppressWarnings("null")
-	public BookCopies getBookCopiesByIdReturn(Connection conn, int bookId, int branchId){
+	public BookCopies getBookCopiesByIdReturn(Connection conn, int bookId, int branchId) {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 		String sqlQuery = "SELECT * FROM `lms`.`tbl_book_copies` WHERE (`lms`.`tbl_book_copies`.`bookId` = ? AND `lms`.`tbl_book_copies`.`branchId` = ?);";
 		BookCopies bookCopies = null;
-		Book book; LibraryBranch libraryBranch;
+		Book book;
+		LibraryBranch libraryBranch;
 		try {
 			prepareStatement = conn.prepareStatement(sqlQuery);
 			prepareStatement.setInt(1, bookId);
 			prepareStatement.setInt(2, branchId);
 			System.out.println(prepareStatement.executeUpdate());
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				bookCopies = new BookCopies();
 				book = bookDao.getBookByIdReturn(conn, resultSet.getInt("bookId"));
 				libraryBranch = libraryBranchDao.getLibraryBranchByIdReturn(conn, resultSet.getInt("branchId"));
-				
+
 				bookCopies.setBookId(book);
 				bookCopies.setBranchId(libraryBranch);
 				bookCopies.setNoOfCopies(resultSet.getInt("noOfCopies"));
@@ -126,23 +131,25 @@ public class BookCopiesDao implements IBookCopiesDao {
 		}
 		return bookCopies;
 	}
-		
-	public boolean updateBookCopies(Connection conn, BookCopies bookCopies){
+
+	public boolean updateBookCopies(Connection conn, BookCopies bookCopies) {
 		PreparedStatement prepareStatement = null;
-		boolean reply = false; int replyInt = 0;
-		Book book; LibraryBranch libraryBranch;
+		boolean reply = false;
+		int replyInt = 0;
+		Book book;
+		LibraryBranch libraryBranch;
 		String sqlQuery = "UPDATE `lms`.`tbl_book_copies` SET `noOfCopies` = ? WHERE ((`bookId` = ?) and (`branchId` = ?));";
 		try {
 			book = bookCopies.getBookId();
 			libraryBranch = bookCopies.getBranchId();
 
 			prepareStatement = conn.prepareStatement(sqlQuery);
-			prepareStatement.setInt(1, bookCopies.getNoOfCopies());	
+			prepareStatement.setInt(1, bookCopies.getNoOfCopies());
 			prepareStatement.setInt(2, book.getBookId());
-			prepareStatement.setInt(3, libraryBranch.getBranchId());
-			
+			prepareStatement.setInt(3, libraryBranch.getLibraryBranchId());
+
 			replyInt = prepareStatement.executeUpdate();
-			if(replyInt == 1) {
+			if (replyInt == 1) {
 				reply = true;
 			}
 		} catch (SQLException e) {
@@ -152,20 +159,22 @@ public class BookCopiesDao implements IBookCopiesDao {
 		return reply;
 	}
 
-	public boolean deleteBookCopiesById(Connection conn, BookCopies bookCopies){
+	public boolean deleteBookCopiesById(Connection conn, BookCopies bookCopies) {
 		PreparedStatement prepareStatement = null;
-		boolean reply = false; int replyInt = 0;
-		Book book; LibraryBranch libraryBranch;
+		boolean reply = false;
+		int replyInt = 0;
+		Book book;
+		LibraryBranch libraryBranch;
 		String sqlQuery = "DELETE FROM `lms`.`tbl_book_copies` WHERE `lms`.`tbl_book_copies`.`bookId` = ? AND `lms`.`tbl_book_copies`.`branchId` = ?;";
 		try {
 			book = bookCopies.getBookId();
 			libraryBranch = bookCopies.getBranchId();
-			
+
 			prepareStatement = conn.prepareStatement(sqlQuery);
 			prepareStatement.setInt(1, book.getBookId());
-			prepareStatement.setInt(2, libraryBranch.getBranchId());
+			prepareStatement.setInt(2, libraryBranch.getLibraryBranchId());
 			replyInt = prepareStatement.executeUpdate();
-			if(replyInt == 1) {
+			if (replyInt == 1) {
 				reply = true;
 			}
 		} catch (SQLException e) {
@@ -174,24 +183,25 @@ public class BookCopiesDao implements IBookCopiesDao {
 		}
 		return reply;
 	}
-	
+
 	@SuppressWarnings("null")
-	public List<BookCopies> getSingleBookCopies(Connection conn, int count){
+	public List<BookCopies> getSingleBookCopies(Connection conn, int count) {
 		PreparedStatement prepareStatement = null;
 		ResultSet resultSet = null;
 		BookCopies bookCopies = null;
 		List<BookCopies> bookCopiesList = null;
-		Book book; LibraryBranch libraryBranch;
+		Book book;
+		LibraryBranch libraryBranch;
 		String sqlQuery = "SELECT * FROM `lms`.`tbl_book_copies` LIMIT ?, 1;";
-		try{
+		try {
 			prepareStatement = conn.prepareStatement(sqlQuery);
-			prepareStatement.setInt(1, count-1);
+			prepareStatement.setInt(1, count - 1);
 			resultSet = prepareStatement.executeQuery();
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				bookCopies = new BookCopies();
 				book = bookDao.getBookByIdReturn(conn, resultSet.getInt("bookId"));
 				libraryBranch = libraryBranchDao.getLibraryBranchByIdReturn(conn, resultSet.getInt("branchId"));
-				
+
 				bookCopies.setBookId(book);
 				bookCopies.setBranchId(libraryBranch);
 				bookCopies.setNoOfCopies(resultSet.getInt("noOfCopies"));
